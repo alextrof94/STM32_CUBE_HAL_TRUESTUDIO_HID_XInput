@@ -46,6 +46,7 @@
 #include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
+#include "usbd_custom_hid_if.h"
 
 /* USER CODE END Includes */
 
@@ -57,7 +58,6 @@ RTC_HandleTypeDef hrtc;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,6 +75,10 @@ static void MX_RTC_Init(void);
 
 /* USER CODE BEGIN 0 */
 
+//extern USBD_HandleTypeDef  *hUsbDeviceFS;
+uint8_t dataToSend[20];
+uint8_t dataReceived[8];
+uint8_t bool = 0;
 /* USER CODE END 0 */
 
 int main(void)
@@ -100,6 +104,10 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN 2 */
+  dataToSend[0] = 'S';
+  dataToSend[1] = 'n';
+  dataToSend[2] = 'd';
+  dataToSend[3] = '\0';
 
   /* USER CODE END 2 */
 
@@ -107,6 +115,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	    HAL_Delay(1000);
+	    bool = !bool;
+	    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, bool);
+	    USBD_CUSTOM_HID_SendReport_FS(dataToSend, 4);
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
