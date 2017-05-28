@@ -83,8 +83,8 @@ uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1); }
 void updateButtons()
 {
 	dataToSend[4] = 0;
-	dataToSend |= (readA() & 1) << 4;
-	dataToSend |= (readB() & 1) << 5;
+	dataToSend[4] |= (readA() & 1) << 4;
+	dataToSend[4] |= (readB() & 1) << 5;
 	dataToSend[3] = 0;
 
 }
