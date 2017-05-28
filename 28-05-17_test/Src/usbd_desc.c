@@ -121,6 +121,7 @@ USBD_DescriptorsTypeDef FS_Desc =
 /* USB Standard Device Descriptor */
 __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   {
+/* USER CODE BEGIN 0 */
 		  18,                       /*bLength */
 		      1,       									/*bDescriptorType*/
 		      0x00,                     /* bcdUSB */
@@ -139,6 +140,7 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
 		      2,								       	/*Index of product string*/
 		      3,        								/*Index of serial number string*/
 		      1  												/*bNumConfigurations*/
+/* USER CODE END 0 */
   } ; 
 /* USB_DeviceDescriptor */
 
