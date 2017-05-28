@@ -80,12 +80,32 @@ uint8_t bool = 0;
 uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0); }
 uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1); }
 
+uint8_t ccc = 0;
 void updateButtons()
 {
-	dataToSend[4] = 0;
-	dataToSend[4] |= (readA() & 1) << 4;
-	dataToSend[4] |= (readB() & 1) << 5;
+	ccc += 10;
+	// btns 10, 9, 7, 8, dr, dl, dd, du
+	dataToSend[2] = 0;
+	// btns 4, 3, 2, 1, 0, _, logo, 6, 5
 	dataToSend[3] = 0;
+	dataToSend[3] |= (readA() & 1) << 4;
+	dataToSend[3] |= (readB() & 1) << 5;
+	// left trigger
+	dataToSend[4] = 0;
+	// right trigger
+	dataToSend[5] = ccc;
+	// lx
+	dataToSend[6] = ccc;
+	dataToSend[7] = ccc;
+	// ly
+	dataToSend[8] = 0;
+	dataToSend[9] = 0;
+	// rx
+	dataToSend[10] = 0;
+	dataToSend[11] = 0;
+	// ry
+	dataToSend[12] = 0;
+	dataToSend[13] = 0;
 
 }
 /* USER CODE END 0 */
@@ -121,7 +141,7 @@ int main(void)
 	    bool = !bool;
 	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, bool);
 	    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, bool);
-
+	    updateButtons();
 	    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, dataToSend, 20);
   /* USER CODE END WHILE */
 
