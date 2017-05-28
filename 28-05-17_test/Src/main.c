@@ -104,10 +104,8 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN 2 */
-  dataToSend[0] = 'S';
-  dataToSend[1] = 'n';
-  dataToSend[2] = 'd';
-  dataToSend[3] = '\0';
+  for (int i = 0; i < 20; i++)
+  dataToSend[i] = i;
 
   /* USER CODE END 2 */
 
@@ -119,7 +117,7 @@ int main(void)
 	    bool = !bool;
 	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, bool);
 	    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, bool);
-	    USBD_CUSTOM_HID_SendReport_FS(dataToSend, 4);
+	    USBD_CUSTOM_HID_SendReport_FS(dataToSend, 20);
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */

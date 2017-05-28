@@ -66,10 +66,10 @@
 /** @defgroup USBD_DESC_Private_Defines
   * @{
   */ 
-#define USBD_VID     1155
+#define USBD_VID     1118
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "alextrof94"
-#define USBD_PID_FS     22352
+#define USBD_PID_FS     654
 #define USBD_PRODUCT_STRING_FS     "STM32 Custom Human interface"
 #define USBD_SERIALNUMBER_STRING_FS     "00000000001A"
 #define USBD_CONFIGURATION_STRING_FS     "Custom HID Config"
@@ -121,24 +121,24 @@ USBD_DescriptorsTypeDef FS_Desc =
 /* USB Standard Device Descriptor */
 __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   {
-    0x12,                       /*bLength */
-    USB_DESC_TYPE_DEVICE,       /*bDescriptorType*/
-    0x00,                       /* bcdUSB */  
-    0x02,
-    0x00,                       /*bDeviceClass*/
-    0x00,                       /*bDeviceSubClass*/
-    0x00,                       /*bDeviceProtocol*/
-    USB_MAX_EP0_SIZE,          /*bMaxPacketSize*/
-    LOBYTE(USBD_VID),           /*idVendor*/
-    HIBYTE(USBD_VID),           /*idVendor*/
-    LOBYTE(USBD_PID_FS),           /*idVendor*/
-    HIBYTE(USBD_PID_FS),           /*idVendor*/
-    0x00,                       /*bcdDevice rel. 2.00*/
-    0x02,
-    USBD_IDX_MFC_STR,           /*Index of manufacturer  string*/
-    USBD_IDX_PRODUCT_STR,       /*Index of product string*/
-    USBD_IDX_SERIAL_STR,        /*Index of serial number string*/
-    USBD_MAX_NUM_CONFIGURATION  /*bNumConfigurations*/
+		    18,                       /*bLength */
+		    1,       									/*bDescriptorType*/
+		    0x00,                     /* bcdUSB */
+		    0x02,
+			0xFF,             /*bDeviceClass*/
+			0xFF,          /*bDeviceSubClass*/
+			0xFF,          /*bDeviceProtocol*/
+		    USB_MAX_EP0_SIZE,         /*bMaxPacketSize*/			// --> EP0_SIZE dando problema
+		    LOBYTE(0x045e),        /*idVendor*/
+		    HIBYTE(0x045e),        /*idVendor*/
+		    LOBYTE(0x028e),       /*idVendor*/
+		    HIBYTE(0x028e),       /*idVendor*/
+		    LOBYTE(0x0114),   /*bcdDevice rel. 2.00*/
+		    HIBYTE(0x0114),
+		    1,           							/*Index of manufacturer  string*/
+		    2,								       	/*Index of product string*/
+		    3,        								/*Index of serial number string*/
+		    1
   } ; 
 /* USB_DeviceDescriptor */
 
@@ -149,10 +149,10 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
 /* USB Standard Device Descriptor */
 __ALIGN_BEGIN uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] __ALIGN_END =
 {
-     USB_LEN_LANGID_STR_DESC,         
-     USB_DESC_TYPE_STRING,       
-     LOBYTE(USBD_LANGID_STRING),
-     HIBYTE(USBD_LANGID_STRING), 
+	     USB_LEN_LANGID_STR_DESC,
+	     USB_DESC_TYPE_STRING,
+	     LOBYTE(USBD_LANGID_STRING),
+	     HIBYTE(USBD_LANGID_STRING),
 };
 
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */
