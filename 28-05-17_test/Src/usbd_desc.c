@@ -70,10 +70,10 @@
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "alextrof94"
 #define USBD_PID_FS     654
-#define USBD_PRODUCT_STRING_FS     "STM32 Custom Human interface"
+#define USBD_PRODUCT_STRING_FS     "MY STM32 Custom Human interface"
 #define USBD_SERIALNUMBER_STRING_FS     "00000000001A"
 #define USBD_CONFIGURATION_STRING_FS     "Custom HID Config"
-#define USBD_INTERFACE_STRING_FS     "Custom HID Interface"
+#define USBD_INTERFACE_STRING_FS     "\xB2\x03\x58\x00\x62\x00\x6F\x00\x78\x00\x20\x00\x53\x00\x65\x00\x63\x00\x75\x00\x72\x00\x69\x00\x74\x00\x79\x00\x20\x00\x4D\x00\x65\x00\x74\x00\x68\x00\x6F\x00\x64\x00\x20\x00\x33\x00\x2C\x00\x20\x00\x56\x00\x65\x00\x72\x00\x73\x00\x69\x00\x6F\x00\x6E\x00\x20\x00\x31\x00\x2E\x00\x30\x00\x30\x00\x2C\x00\x20\x00\xA9\x00\x20\x00\x32\x00\x30\x00\x30\x00\x35\x00\x20\x00\x4D\x00\x69\x00\x63\x00\x72\x00\x6F\x00\x73\x00\x6F\x00\x66\x00\x74\x00\x20\x00\x43\x00\x6F\x00\x72\x00\x70\x00\x6F\x00\x72\x00\x61\x00\x74\x00\x69\x00\x6F\x00\x6E\x00\x2E\x00\x20\x00\x41\x00\x6C\x00\x6C\x00\x20\x00\x72\x00\x69\x00\x67\x00\x68\x00\x74\x00\x73\x00\x20\x00\x72\x00\x65\x00\x73\x00\x65\x00\x72\x00\x76\x00\x65\x00\x64\x00\x2E\x00"				// (ALTERAR)
 
 /* USER CODE BEGIN 0 */
 
@@ -121,24 +121,24 @@ USBD_DescriptorsTypeDef FS_Desc =
 /* USB Standard Device Descriptor */
 __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   {
-		    18,                       /*bLength */
-		    1,       									/*bDescriptorType*/
-		    0x00,                     /* bcdUSB */
-		    0x02,
-			0xFF,             /*bDeviceClass*/
-			0xFF,          /*bDeviceSubClass*/
-			0xFF,          /*bDeviceProtocol*/
-		    USB_MAX_EP0_SIZE,         /*bMaxPacketSize*/			// --> EP0_SIZE dando problema
-		    LOBYTE(0x045e),        /*idVendor*/
-		    HIBYTE(0x045e),        /*idVendor*/
-		    LOBYTE(0x028e),       /*idVendor*/
-		    HIBYTE(0x028e),       /*idVendor*/
-		    LOBYTE(0x0114),   /*bcdDevice rel. 2.00*/
-		    HIBYTE(0x0114),
-		    1,           							/*Index of manufacturer  string*/
-		    2,								       	/*Index of product string*/
-		    3,        								/*Index of serial number string*/
-		    1
+		  18,                       /*bLength */
+		      1,       									/*bDescriptorType*/
+		      0x00,                     /* bcdUSB */
+		      0x02,
+			  0xFF,             /*bDeviceClass*/
+			  0xFF,          /*bDeviceSubClass*/
+			  0xFF,          /*bDeviceProtocol*/
+		      USB_MAX_EP0_SIZE,         /*bMaxPacketSize*/			// --> EP0_SIZE dando problema
+		      LOBYTE(USBD_VID),        /*idVendor*/
+		      HIBYTE(USBD_VID),        /*idVendor*/
+		      LOBYTE(USBD_PID_FS),       /*idVendor*/
+		      HIBYTE(USBD_PID_FS),       /*idVendor*/
+		      LOBYTE(0x0114),   /*bcdDevice rel. 2.00*/
+		      HIBYTE(0x0114),
+		      1,           							/*Index of manufacturer  string*/
+		      2,								       	/*Index of product string*/
+		      3,        								/*Index of serial number string*/
+		      1  												/*bNumConfigurations*/
   } ; 
 /* USB_DeviceDescriptor */
 
@@ -149,10 +149,10 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
 /* USB Standard Device Descriptor */
 __ALIGN_BEGIN uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] __ALIGN_END =
 {
-	     USB_LEN_LANGID_STR_DESC,
-	     USB_DESC_TYPE_STRING,
-	     LOBYTE(USBD_LANGID_STRING),
-	     HIBYTE(USBD_LANGID_STRING),
+     USB_LEN_LANGID_STR_DESC,         
+     USB_DESC_TYPE_STRING,       
+     LOBYTE(USBD_LANGID_STRING),
+     HIBYTE(USBD_LANGID_STRING), 
 };
 
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */

@@ -50,12 +50,12 @@
   * @{
   */ 
 #define CUSTOM_HID_EPIN_ADDR                 0x81
-#define CUSTOM_HID_EPIN_SIZE                 8
+#define CUSTOM_HID_EPIN_SIZE                 0x20		//0x02
 
-#define CUSTOM_HID_EPOUT_ADDR                0x01
-#define CUSTOM_HID_EPOUT_SIZE                20
+#define CUSTOM_HID_EPOUT_ADDR                0x02
+#define CUSTOM_HID_EPOUT_SIZE                0x08
 
-#define USB_CUSTOM_HID_CONFIG_DESC_SIZ       153
+#define USB_CUSTOM_HID_CONFIG_DESC_SIZ       153			//(ALTERAR)
 #define USB_CUSTOM_HID_DESC_SIZ              9
 
 #define CUSTOM_HID_DESCRIPTOR_TYPE           0x21
