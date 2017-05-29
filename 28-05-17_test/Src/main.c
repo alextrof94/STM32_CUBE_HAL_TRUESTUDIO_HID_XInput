@@ -87,12 +87,14 @@ uint8_t dataToSend[20] = {0x00, 0x14, 0x01, 0xEE, 0x0F, 0x00, 0x0F, 0x00, 0xFF, 
 //                        butns|size|     |     | lt  | rt  | lx        | ly        | rx        | ry        | unused
 //                                    b10 & b9  & b7  & b8  & dr  & dl  & dd  & du
 //                                          b4  & b3  & b2  & b1  & b0  & nusd & xbox & b6  & b5
-uint8_t dataReceived[8];
-uint8_t bool = 0;
+uint8_t dataReceived[8]; // not used yet
 int16_t adcFrom [3];
 
-uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3); }
-uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); }
+uint32_t ticksNextBlink = 0;
+uint32_t ticksForBlink = 1000;
+
+uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); }
+uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3); }
 uint8_t readX(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5); }
 uint8_t readY(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6); }
 uint8_t readStart(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7); }
@@ -103,7 +105,7 @@ void updateButtons()
 	ccc += 10;
 	// btns 10, 9, 7, 8, dr, dl, dd, du
 	dataToSend[2] = 0;
-	// btns 4, 3, 2, 1, 0, _, logo, 6, 5
+	// btns 4, 3, 2, 1, 0, _, logo, 6, 5 ??? ERROR
 	dataToSend[3] = 0;
 	dataToSend[3] |= (readA() & 1) << 4;
 	dataToSend[3] |= (readB() & 1) << 5;
@@ -115,6 +117,7 @@ void updateButtons()
 	// right trigger
 	dataToSend[5] = 0x7F;
 	// lx
+	adcFrom[1] = -adcFrom[1];
 	dataToSend[6] = adcFrom[1] & 0xFF;
 	dataToSend[7] = (adcFrom[1] >> 8) & 0xFF;
 	// ly
@@ -155,16 +158,18 @@ int main(void)
   MX_I2C1_Init();
 
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adcFrom, 3);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adcFrom, 3); // for analog reading start periph-to-mem dma for 3 pins. settings in CUBE
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	    //HAL_Delay(100);
-	    //bool = !bool;
-	    //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, bool);
+	  if (HAL_GetTick() > ticksNextBlink)
+	  {
+		  ticksNextBlink = HAL_GetTick() + ticksForBlink;
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, !HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
+	  }
 	    updateButtons();
 	    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, dataToSend, 20);
   /* USER CODE END WHILE */
