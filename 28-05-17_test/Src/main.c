@@ -89,10 +89,13 @@ uint8_t dataToSend[20] = {0x00, 0x14, 0x01, 0xEE, 0x0F, 0x00, 0x0F, 0x00, 0xFF, 
 //                                          b4  & b3  & b2  & b1  & b0  & nusd & xbox & b6  & b5
 uint8_t dataReceived[8];
 uint8_t bool = 0;
-uint16_t adcFrom [6];
+int16_t adcFrom [3];
 
-uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0); }
-uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1); }
+uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3); }
+uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); }
+uint8_t readX(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5); }
+uint8_t readY(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6); }
+uint8_t readStart(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7); }
 
 uint8_t ccc = 0;
 void updateButtons()
@@ -104,22 +107,25 @@ void updateButtons()
 	dataToSend[3] = 0;
 	dataToSend[3] |= (readA() & 1) << 4;
 	dataToSend[3] |= (readB() & 1) << 5;
+	dataToSend[3] |= (readX() & 1) << 6;
+	dataToSend[3] |= (readY() & 1) << 7;
+	dataToSend[3] |= (readStart() & 1) << 0;
 	// left trigger
 	dataToSend[4] = 0x7F;
 	// right trigger
 	dataToSend[5] = 0x7F;
 	// lx
-	dataToSend[6] = adcFrom[0] & 0x00FF;
-	dataToSend[7] = (adcFrom[0] >> 8) & 0x00FF;
+	dataToSend[6] = adcFrom[1] & 0xFF;
+	dataToSend[7] = (adcFrom[1] >> 8) & 0xFF;
 	// ly
-	dataToSend[8] = adcFrom[1] & 0x00FF;
-	dataToSend[9] = (adcFrom[1] >> 8) & 0x00FF;
+	dataToSend[8] = adcFrom[0] & 0xFF;
+	dataToSend[9] = (adcFrom[0] >> 8) & 0xFF;
 	// rx
-	dataToSend[10] = 0x80;
-	dataToSend[11] = 0x00;
+	dataToSend[10] = 0x7F;
+	dataToSend[11] = 0xFF;
 	// ry
-	dataToSend[12] = adcFrom[2] & 0x00FF;
-	dataToSend[13] = (adcFrom[2] >> 8) & 0x00FF;
+	dataToSend[12] = adcFrom[2] & 0xFF;
+	dataToSend[13] = (adcFrom[2] >> 8) & 0xFF;
 
 }
 /* USER CODE END 0 */
@@ -149,17 +155,16 @@ int main(void)
   MX_I2C1_Init();
 
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adcFrom, 6);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adcFrom, 3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	    HAL_Delay(100);
-	    bool = !bool;
-	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, bool);
-	    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, bool);
+	    //HAL_Delay(100);
+	    //bool = !bool;
+	    //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, bool);
 	    updateButtons();
 	    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, dataToSend, 20);
   /* USER CODE END WHILE */
