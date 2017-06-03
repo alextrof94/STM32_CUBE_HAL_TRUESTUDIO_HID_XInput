@@ -88,10 +88,13 @@ uint8_t dataToSend[20] = {0x00, 0x14, 0x01, 0xEE, 0x0F, 0x00, 0x0F, 0x00, 0xFF, 
 //                                    b10 & b9  & b7  & b8  & dr  & dl  & dd  & du
 //                                          b4  & b3  & b2  & b1  & b0  & nusd & xbox & b6  & b5
 uint8_t dataReceived[8]; // not used yet
-int16_t adcFrom [3];
+uint16_t adcFrom [3];
+int16_t adcFromBuffer [3];
 
 uint32_t ticksNextBlink = 0;
 uint32_t ticksForBlink = 1000;
+
+uint8_t buttonPressed = 0;
 
 uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); }
 uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3); }
@@ -99,36 +102,46 @@ uint8_t readX(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5); }
 uint8_t readY(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6); }
 uint8_t readStart(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7); }
 
-uint8_t ccc = 0;
 void updateButtons()
 {
-	ccc += 10;
-	// btns 10, 9, 7, 8, dr, dl, dd, du
+	// btns |rs|, |ls|, |select|, |start|, |dr|, |dl|, |dd|, |du|
 	dataToSend[2] = 0;
-	// btns 4, 3, 2, 1, 0, _, logo, 6, 5 ??? ERROR
+	dataToSend[2] |= (readStart() & 1) << 4; // true
+	// btns |y|, |x|, |b|, |a|, _, _, |rb|, |lb|
+
 	dataToSend[3] = 0;
-	dataToSend[3] |= (readA() & 1) << 4;
-	dataToSend[3] |= (readB() & 1) << 5;
-	dataToSend[3] |= (readX() & 1) << 6;
-	dataToSend[3] |= (readY() & 1) << 7;
-	dataToSend[3] |= (readStart() & 1) << 0;
+	dataToSend[3] |= (readA() & 1) << 4; // true
+	dataToSend[3] |= (readB() & 1) << 5; // true
+	dataToSend[3] |= (readX() & 1) << 6; // true
+	dataToSend[3] |= (readY() & 1) << 7; // true
+	//
+	buttonPressed = dataToSend[2] || dataToSend[3];
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, buttonPressed);
 	// left trigger
 	dataToSend[4] = 0x7F;
 	// right trigger
-	dataToSend[5] = 0x7F;
+	adcFrom[2] /= 16;
+	adcFrom[2] = 255 - adcFrom[2];
+	dataToSend[5] = adcFrom[2] & 0xFF;
 	// lx
-	adcFrom[1] = -adcFrom[1];
-	dataToSend[6] = adcFrom[1] & 0xFF;
-	dataToSend[7] = (adcFrom[1] >> 8) & 0xFF;
+	adcFromBuffer[1] = (int16_t)adcFrom[1];
+	adcFromBuffer[1] -= 2048;
+	adcFromBuffer[1] = -adcFromBuffer[1];
+	adcFromBuffer[1] *= 16;
+	dataToSend[6] = adcFromBuffer[1] & 0xFF;
+	dataToSend[7] = (adcFromBuffer[1] >> 8) & 0xFF;
 	// ly
-	dataToSend[8] = adcFrom[0] & 0xFF;
-	dataToSend[9] = (adcFrom[0] >> 8) & 0xFF;
+	adcFromBuffer[0] = (int16_t)adcFrom[0];
+	adcFromBuffer[0] -= 2048;
+	adcFromBuffer[0] *= 16;
+	dataToSend[8] = adcFromBuffer[0] & 0xFF;
+	dataToSend[9] = (adcFromBuffer[0] >> 8) & 0xFF;
 	// rx
 	dataToSend[10] = 0x7F;
 	dataToSend[11] = 0xFF;
 	// ry
-	dataToSend[12] = adcFrom[2] & 0xFF;
-	dataToSend[13] = (adcFrom[2] >> 8) & 0xFF;
+	dataToSend[12] = 0x7F;
+	dataToSend[13] = 0xFF;
 
 }
 /* USER CODE END 0 */
