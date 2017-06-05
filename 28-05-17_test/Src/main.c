@@ -48,6 +48,7 @@
 /* USER CODE BEGIN Includes */
 #include "usbd_custom_hid_if.h"
 #include "usbd_customhid.h"
+//#include "stdio.h"
 
 /* USER CODE END Includes */
 
@@ -81,7 +82,56 @@ static void MX_I2C1_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+void UU_PutChar(uint8_t ch)
+{
+  while(!(USART3->SR & USART_SR_TXE));
+  USART3->DR = ch;
+}
+void U3S(uint8_t * str)
+{
+  while(*str != 0)
+  {
+    UU_PutChar(*str);
+    str++;
+  }
+}
+void U3N(uint32_t x)
+{
+  char value[10]; //a temp array to hold results of conversion
+  int i = 0; //loop index
 
+  do
+  {
+    value[i++] = (char)(x % 10) + '0'; //convert integer to character
+    x /= 10;
+  } while(x);
+
+  while(i) //send data
+  {
+    UU_PutChar(value[--i]);
+  }
+}
+void U3NS(int32_t x)
+{
+  char value[10]; //a temp array to hold results of conversion
+  int i = 0; //loop index
+
+  if (x < 0)
+  {
+	  value[i++] = '-';
+	  x = -x;
+  }
+  do
+  {
+    value[i++] = (char)((x % 10) + '0'); //convert integer to character
+    x /= 10;
+  } while(x > 0 || x < -0);
+
+  while(i) //send data
+  {
+    UU_PutChar(value[--i]);
+  }
+}
 //extern USBD_HandleTypeDef  *hUsbDeviceFS;
 uint8_t dataToSend[20] = {0x00, 0x14, 0x01, 0xEE, 0x0F, 0x00, 0x0F, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 //                        butns|size|     |     | lt  | rt  | lx        | ly        | rx        | ry        | unused
@@ -96,37 +146,59 @@ uint32_t ticksForBlink = 1000;
 
 uint8_t buttonPressed = 0;
 
-uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); }
-uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3); }
+uint8_t readA(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3); }
+uint8_t readB(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); }
 uint8_t readX(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5); }
 uint8_t readY(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6); }
-uint8_t readStart(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7); }
+uint8_t readMode(){ return HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1); }
+uint8_t readLB(){ return 0; }
+uint8_t readRB(){ return 0; }
+uint8_t readDU(){ return 0; }
+uint8_t readDD(){ return 0; }
+uint8_t readDL(){ return 0; }
+uint8_t readDR(){ return 0; }
+uint8_t readStart(){ return HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0); }
+uint8_t readBack(){ return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7); }
+uint8_t readLS(){ return 0; }
+uint8_t readRS(){ return 0; }
 
 void updateButtons()
 {
 	// btns |rs|, |ls|, |select|, |start|, |dr|, |dl|, |dd|, |du|
 	dataToSend[2] = 0;
-	dataToSend[2] |= (readStart() & 1) << 4; // true
+	dataToSend[2] |= (readDU() & 1) << 0;
+	dataToSend[2] |= (readDD() & 1) << 1;
+	dataToSend[2] |= (readDL() & 1) << 2;
+	dataToSend[2] |= (readDR() & 1) << 3;
+	dataToSend[2] |= (readStart() & 1) << 4;
+	dataToSend[2] |= (readBack()  & 1) << 5;
+	dataToSend[2] |= (readLS() & 1) << 6;
+	dataToSend[2] |= (readRS() & 1) << 7;
 	// btns |y|, |x|, |b|, |a|, _, _, |rb|, |lb|
 
 	dataToSend[3] = 0;
-	dataToSend[3] |= (readA() & 1) << 4; // true
-	dataToSend[3] |= (readB() & 1) << 5; // true
-	dataToSend[3] |= (readX() & 1) << 6; // true
-	dataToSend[3] |= (readY() & 1) << 7; // true
-	//
-	buttonPressed = dataToSend[2] || dataToSend[3];
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, buttonPressed);
-	// left trigger
-	dataToSend[4] = 0x7F;
-	// right trigger
-	adcFrom[2] /= 16;
-	adcFrom[2] = 255 - adcFrom[2];
-	dataToSend[5] = adcFrom[2] & 0xFF;
+	dataToSend[3] |= (readLB() & 1) << 0;
+	dataToSend[3] |= (readRB() & 1) << 1;
+	dataToSend[3] |= (0 & 1) << 2;
+	dataToSend[3] |= (0 & 1) << 3;
+	dataToSend[3] |= (readA()  & 1) << 4;
+	dataToSend[3] |= (readB()  & 1) << 5;
+	dataToSend[3] |= (readX()  & 1) << 6;
+	dataToSend[3] |= (readY()  & 1) << 7;
+	// z = -left-trigger zone _ 0 _ right-trigger zone
+	adcFromBuffer[2] = (int16_t)adcFrom[2];
+	adcFromBuffer[2] /= 8;
+	adcFromBuffer[2] = adcFromBuffer[2] - 255;
+	// left & right triggers
+	dataToSend[4] = 0; //left
+	dataToSend[5] = 0; //right
+	if (adcFromBuffer[2] < 0)
+		dataToSend[4] = (uint8_t)(256 - (adcFromBuffer[2] & 0xFF));
+	else
+		dataToSend[5] = adcFromBuffer[2] & 0xFF;
 	// lx
 	adcFromBuffer[1] = (int16_t)adcFrom[1];
 	adcFromBuffer[1] -= 2048;
-	adcFromBuffer[1] = -adcFromBuffer[1];
 	adcFromBuffer[1] *= 16;
 	dataToSend[6] = adcFromBuffer[1] & 0xFF;
 	dataToSend[7] = (adcFromBuffer[1] >> 8) & 0xFF;
@@ -143,6 +215,9 @@ void updateButtons()
 	dataToSend[12] = 0x7F;
 	dataToSend[13] = 0xFF;
 
+	// visual can delete
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, dataToSend[2] || dataToSend[3]);
+
 }
 /* USER CODE END 0 */
 
@@ -150,7 +225,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
